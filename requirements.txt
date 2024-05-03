@@ -1,0 +1,8 @@
+beautifulsoup4
+fastapi
+uvicorn 
+pdfreader
+pypdf
+google-generativeai
+nltk
+langchain
