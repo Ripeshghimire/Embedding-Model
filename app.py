@@ -13,6 +13,7 @@ from pypdf import PdfReader
 import google.generativeai as genai
 import uvicorn 
 import re 
+import requests
 from io import BytesIO
 from langchain_text_splitters import CharacterTextSplitter
 from tqdm import tqdm
@@ -57,19 +58,21 @@ async def extract_text(pdfFile:UploadFile):
     return {"text":(cleanpdf_text(text))}
 
 @app.post('/embedding')
-def embed_and_chunk_text(request:Request):
-    url = 'http://127.0.0.1:8000/pdf'
-    
-
+async def embed_and_chunk_text(request:Request):
     '''Takes a input of the text that is given by the pdf after cleaning and embeds the given token'''
+    data = await request.json()
+    extracted_text = data['text']
     text_splitter = CharacterTextSplitter(
-        separator="",
+        separator=".",
         chunk_size=1500,
         chunk_overlap = 500,
+        length_function=len,
+        is_separator_regex=False,
     )
-    text = text_splitter.create_documents([text])
+    text = text_splitter.create_documents([extracted_text])
+    texts = [i.page_content for i in text]
     embds = []
-    for text in tqdm(text):
+    for text in tqdm(texts):
      try:
         a = genai.embed_content(
         model="models/embedding-001",
@@ -79,6 +82,6 @@ def embed_and_chunk_text(request:Request):
         embds.append(a)
      except Exception as e:
         print(e)
-        return embds
+        return {"embedded_text":embds}
 if __name__ == '__main__':
     uvicorn.run(app,port=8000)
