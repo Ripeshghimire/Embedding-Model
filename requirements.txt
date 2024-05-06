@@ -6,3 +6,5 @@ pypdf
 google-generativeai
 nltk
 langchain
+pandas
+scikit-learn
