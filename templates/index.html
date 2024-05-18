@@ -3,58 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Question Answering System</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>PDF Text Extraction</title>
+    <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-    <div class="container mt-5">
-        <h1 class="mb-4">PDF Question Answering System</h1>
-        <form id="pdfForm" enctype="multipart/form-data">
-            <div class="form-group">
-                <label for="pdfFile">Upload PDF File:</label>
-                <input type="file" class="form-control-file" id="pdfFile" name="pdfFile" accept=".pdf" required>
+    <div class="container">
+        <h1>PDF Text Extraction</h1>
+        <div class="form-container">
+            <form id="pdf-form" enctype="multipart/form-data">
+                <input type="file" id="pdf-file" name="pdfFile" accept=".pdf" required>
+                <button type="submit">Upload PDF</button>
+            </form>
+            <div id="similarity-container" class="hidden">
+                <input type="text" id="similarity-input" placeholder="Enter text to check similarity">
+                <button id="similarity-btn">Check Similarity</button>
+                <div id="similarity-result"></div>
             </div>
-            <div class="form-group">
-                <label for="question">Ask a Question:</label>
-                <input type="text" class="form-control" id="question" name="question" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
-        </form>
-        <div id="results" class="mt-4"></div>
+        </div>
     </div>
-
-    <script>
-        document.getElementById('pdfForm').addEventListener('submit', async function(event) {
-            event.preventDefault();
-            const formData = new FormData(this);
-            const response = await fetch('/pdf', {
-                method: 'POST',
-                body: formData
-            });
-            const data = await response.json();
-            const question = document.getElementById('question').value;
-            const similarityResponse = await fetch('/similarity', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ question: question })
-            });
-            const similarityData = await similarityResponse.json();
-            displayResults(similarityData);
-        });
-
-        function displayResults(results) {
-            const resultsDiv = document.getElementById('results');
-            resultsDiv.innerHTML = '';
-            if (results.length === 0) {
-                resultsDiv.innerHTML = '<p>No answer found for the question.</p>';
-            } else {
-                results.forEach(result => {
-                    resultsDiv.innerHTML += `<p>Similarity: ${result.similarity.toFixed(2)}</p><p>Text Chunk: ${result.text_chunk}</p>`;
-                });
-            }
-        }
-    </script>
+    <script src="/static/script.js"></script>
 </body>
 </html>

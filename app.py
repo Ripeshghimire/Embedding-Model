@@ -14,7 +14,7 @@ import json
 # from embedding import embed_and_chunk_text 
 import pandas as pd
 from cleantext import cleanpdf_text
-from retrieval import embed_text
+from retrieval import embed_text,encode_question,get_similar_text
 import warnings
 import chromadb
 warnings.filterwarnings("ignore")
@@ -56,7 +56,9 @@ async def extract_text(pdfFile:UploadFile):
     data_dict = text_chunks_df.to_dict(orient='records')
     # Serialize the dictionary to JSON
     json_data = json.dumps(data_dict)
-    collection.add(json_data)
+    parsed_data = json.loads(json_data)
+    data = [i['embeddding'] for i in parsed_data]
+    collection.add(data)
     return json_data
 
 
@@ -66,13 +68,9 @@ async def checksimilarity(request:Request):
         takes input finds the most similar text and gives the output of the code     
     '''
     question = await request.json()
-    query = question['question']
-    result = collection.query(
-        query_texts= query,
-        n_results=1
-    )    
-    return result 
-    
+    encoded_question = encode_question(question)
+    similarity_text = get_similar_text(encoded_question)
+    return similarity_text
 
 if __name__ == '__main__':
     uvicorn.run(app,port=8000)
