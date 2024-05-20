@@ -73,3 +73,4 @@ def get_similar_text(embed_question):
     return results
 
     
+    
