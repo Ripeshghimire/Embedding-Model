@@ -8,6 +8,7 @@ import google.generativeai as genai
 from pypdf import PdfReader
 import uvicorn
 from io import BytesIO
+from dotenv import load_dotenv
 import json
 import pandas as pd
 from cleantext import cleanpdf_text
@@ -15,10 +16,13 @@ from retrieval import chunk_text,embed_text,encode_question
 import warnings
 import chromadb
 import logging
+from langchain_community.vectorstores import chroma
+load_dotenv()
 logging.basicConfig(level=logging.INFO)
 warnings.filterwarnings("ignore")
 df = pd.DataFrame(columns=['chunk_text','embeddings'])
 genai.configure(api_key=os.environ["API_KEY"])
+
 
 app = FastAPI()
 chroma_client = chromadb.Client()
@@ -73,3 +77,4 @@ async def similar_text(request:Request):
     return text['data']
 if __name__ == "__main__":
     uvicorn.run(app,port=8000)
+    

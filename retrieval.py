@@ -67,7 +67,7 @@ def embed_text(chunked_text: list):
         ids.append(str(uuid.uuid4())) 
     # Assuming collection is defined and initialized earlier
     collection.add(
-        embeddings=embeddings,  # Corrected the typo here
+        embeddings=embeddings,  # Corrected the typo here whow are you ==
         documents=chunked_text,  # Passing the list of chunks as documents
         ids = ids
     )
@@ -90,13 +90,13 @@ def encode_question(query):
 #     parameter: 
 #         embed_question-> embedding vector of question 
 #         embeds_pdf ->  embedding vector of pdf text
-#     returns:
+    # returns:
 #         the most similar response from the pdf text after comparing question embedding and pdf embedding
 #     '''    
 #     results = collection2.query(
 #         query_embeddings = embed_question,
 #         n_results=1
-#     )
+#     )                                         
 #     return results
 
     
