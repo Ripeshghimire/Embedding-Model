@@ -9,7 +9,7 @@ import chromadb
 genai.configure(api_key=os.environ["API_KEY"])
 # df = pd.DataFrame(columns=["chunk_text","embedding_vector"])
 chroma_client = chromadb.Client()
-collection2 = chroma_client.get_collection('my_collection')
+
 text_splitter = RecursiveCharacterTextSplitter(
     chunk_size = 700,
     chunk_overlap = 300,
@@ -57,20 +57,20 @@ def encode_question(query):
     return embed_question
 
 #check similarity between question and text embedding vector
-def get_similar_text(embed_question):
-    '''
-    compares the question vector embedding and pdftext embedding and finds the most similar answer to the question
-    parameter: 
-        embed_question-> embedding vector of question 
-        embeds_pdf ->  embedding vector of pdf text
-    returns:
-        the most similar response from the pdf text after comparing question embedding and pdf embedding
-    '''    
-    results = collection2.query(
-        query_embeddings = embed_question,
-        n_results=1
-    )
-    return results
+# def get_similar_text(embed_question):
+#     '''
+#     compares the question vector embedding and pdftext embedding and finds the most similar answer to the question
+#     parameter: 
+#         embed_question-> embedding vector of question 
+#         embeds_pdf ->  embedding vector of pdf text
+#     returns:
+#         the most similar response from the pdf text after comparing question embedding and pdf embedding
+#     '''    
+#     results = collection2.query(
+#         query_embeddings = embed_question,
+#         n_results=1
+#     )
+#     return results
 
     
     

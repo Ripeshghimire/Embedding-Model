@@ -3,24 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Text Extraction</title>
-    <link rel="stylesheet" href="/static/styles.css">
+    <title>RAG Application</title>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
     <div class="container">
-        <h1>PDF Text Extraction</h1>
-        <div class="form-container">
-            <form id="pdf-form" enctype="multipart/form-data">
-                <input type="file" id="pdf-file" name="pdfFile" accept=".pdf" required>
-                <button type="submit">Upload PDF</button>
-            </form>
-            <div id="similarity-container" class="hidden">
-                <input type="text" id="similarity-input" placeholder="Enter text to check similarity">
-                <button id="similarity-btn">Check Similarity</button>
-                <div id="similarity-result"></div>
-            </div>
-        </div>
+        <h1>RAG Application</h1>
+
+        <!-- PDF Upload Form -->
+        <h2>Upload PDF</h2>
+        <form id="pdf-upload-form" enctype="multipart/form-data">
+            <input type="file" id="pdfFile" name="pdfFile" accept="application/pdf">
+            <button type="submit">Upload</button>
+        </form>
+        <div id="upload-result"></div>
+
+        <!-- Similarity Checker Form -->
+        <h2>Check Similarity</h2>
+        <form id="similarity-checker-form">
+            <textarea id="question" name="question" rows="4" cols="50" placeholder="Enter your question..."></textarea>
+            <button type="submit">Check</button>
+        </form>
+        <div id="similarity-result"></div>
     </div>
-    <script src="/static/script.js"></script>
+    <script src="/static/scripts.js"></script>
 </body>
 </html>
