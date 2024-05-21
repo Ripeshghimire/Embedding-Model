@@ -1,45 +1,41 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const pdfUploadForm = document.getElementById("pdf-upload-form");
-    const similarityCheckerForm = document.getElementById("similarity-checker-form");dxc
+document.addEventListener("DOMContentLoaded", function() {
+    const pdfForm = document.getElementById("pdf-form");
+    const queryForm = document.getElementById("query-form");
+    const resultDiv = document.getElementById("result");
 
-    pdfUploadForm.addEventListener("submit", async (event) => {
+    pdfForm.addEventListener("submit", async (event) => {
         event.preventDefault();
-
+        const pdfFile = document.getElementById("pdf-file").files[0];
         const formData = new FormData();
-        const pdfFile = document.getElementById("pdfFile").files[0];
         formData.append("pdfFile", pdfFile);
 
-        const response = await fetch("/pdf", {
-            method: "POST",
-            body: formData,
-        });
-
-        if (response.ok) {
-            const result = await response.json();
-            document.getElementById("upload-result").innerText = JSON.stringify(result, null, 2);
-        } else {
-            document.getElementById("upload-result").innerText = "Failed to upload PDF.";
-        }     
+        try {
+            const response = await fetch("/pdf", {
+                method: "POST",
+                body: formData
+            });
+            const data = await response.json();
+            console.log(data);
+        } catch (error) {
+            console.error("Error uploading PDF:", error);
+        }
     });
 
-    similarityCheckerForm.addEventListener("submit", async (event) => {
+    queryForm.addEventListener("submit", async (event) => {
         event.preventDefault();
-
-        const question = document.getElementById("question").value;
-
-        const response = await fetch("/similaritychecker", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ question }),
-        });
-
-        if (response.ok) {
-            const result = await response.json();
-            document.getElementById("similarity-result").innerText = JSON.stringify(result, null, 2);
-        } else {
-            document.getElementById("similarity-result").innerText = "Failed to check similarity.";
+        const query = document.getElementById("query").value;
+        try {
+            const response = await fetch("/similar_text", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ question: query })
+            });
+            const data = await response.json();
+            resultDiv.textContent = data.result;
+        } catch (error) {
+            console.error("Error fetching similar text:", error);
         }
     });
 });

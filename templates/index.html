@@ -1,31 +1,30 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RAG Application</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <title>PDF Similarity Search</title>
+    <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
     <div class="container">
-        <h1>RAG Application</h1>
-
-        <!-- PDF Upload Form -->
-        <h2>Upload PDF</h2>
-        <form id="pdf-upload-form" enctype="multipart/form-data">
-            <input type="file" id="pdfFile" name="pdfFile" accept="application/pdf">
-            <button type="submit">Upload</button>
-        </form>
-        <div id="upload-result"></div>
-
-        <!-- Similarity Checker Form -->
-        <h2>Check Similarity</h2>
-        <form id="similarity-checker-form">
-            <textarea id="question" name="question" rows="4" cols="50" placeholder="Enter your question..."></textarea>
-            <button type="submit">Check</button>
-        </form>
-        <div id="similarity-result"></div>
+        <h1>PDF Similarity Search</h1>
+        <div class="form-container">
+            <form id="pdf-form" enctype="multipart/form-data">
+                <label for="pdf-file">Upload PDF:</label>
+                <input type="file" id="pdf-file" name="pdf-file" required>
+                <button type="submit">Upload</button>
+            </form>
+            <form id="query-form">
+                <label for="query">Enter a question:</label>
+                <input type="text" id="query" name="query" required>
+                <button type="submit">Search</button>
+            </form>
+        </div>
+        <div class="result-container">
+            <h2>Result:</h2>
+            <div id="result"></div>
+        </div>
     </div>
-    <script src="/static/scripts.js"></script>
+
+    <script src="/static/script.js"></script>
 </body>
 </html>

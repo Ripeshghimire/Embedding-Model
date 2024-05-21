@@ -1,50 +1,77 @@
+import uuid
 from tqdm import tqdm
 import google.generativeai as genai  
 import os
 from sentence_transformers import SentenceTransformer
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_text_splitters.base import Document
+import numpy as np
 import pandas as pd 
 from sentence_transformers import SentenceTransformer
 import chromadb
+import warnings
+warnings.filterwarnings('ignore')
 genai.configure(api_key=os.environ["API_KEY"])
 # df = pd.DataFrame(columns=["chunk_text","embedding_vector"])
 chroma_client = chromadb.Client()
-
-text_splitter = RecursiveCharacterTextSplitter(
-    chunk_size = 700,
-    chunk_overlap = 300,
-    length_function = len,
-    separators=[
-        "\n\n",
-        "\n",
-        " ",
-        ".",
-        ",",
-        "\u200b",  # Zero-width space
-        "\uff0c",  # Fullwidth comma
-        "\u3001",  # Ideographic comma
-        "\uff0e",  # Fullwidth full stop
-        "\u3002",  # Ideographic full stop
-        "",
-    ],
-    is_separator_regex=False
-)
+collection = chroma_client.create_collection('vector_collection')
 model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+def chunk_text(pdf_text:str):
+    '''
+    Chunks the text from the PDF and returns the chunked text.
+    Parameters:
+    pdf_text (str): Text from the PDF.
+    '''
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=700,
+        chunk_overlap=500,
+        length_function=len,
+        separators=[
+            "\n\n",
+            "\n",
+            " ",
+            ".",
+            ",",
+            "\u200b",  # Zero-width space
+            "\uff0c",  # Fullwidth comma
+            "\u3001",  # Ideographic comma
+            "\uff0e",  # Fullwidth full stop
+            "\u3002",  # Ideographic full stop
+            "",
+        ],
+        is_separator_regex=False
+    )
+    document = Document(page_content=pdf_text)
+    texts = text_splitter.split_documents([document])
+    chunked_text = [i.page_content for i in texts ]
+    return chunked_text
+
+
+
 #Embedding pdf text 
-def embed_text(pdfText:str):
+def embed_text(chunked_text: list):
     '''
-    chunks the given text from the extracted pdf and embeds into vectors using embedding library
-    parameter -> takes pdfText as input 
-    Returns -> chunk text and embedding vector in df format 
+    Embeds the chunked text that is chunked in {chunk_text} function.
+    Parameters:
+    chunked_text (list): Chunked text obtained from chunk_text function.
+    Returns:
+    list: Chunk embedding vectors from the chunk_text.
     '''
-    data = []
-    text = text_splitter.create_documents([pdfText])
-    chunk_text = [i.page_content for i in text]
-    for text in tqdm(chunk_text):
-        embedding = model.encode(text)
-        data.append({'chunk_text': text, 'embedding': embedding})
-    df = pd.DataFrame(data)
-    return df
+    ids = []
+    embeddings = []
+    for chunk in chunked_text:
+        embds = model.encode(chunk)
+        # Convert NumPy array to list
+        embds_list = embds.tolist()
+        embeddings.append(embds_list)
+        ids.append(str(uuid.uuid4())) 
+    # Assuming collection is defined and initialized earlier
+    collection.add(
+        embeddings=embeddings,  # Corrected the typo here
+        documents=chunked_text,  # Passing the list of chunks as documents
+        ids = ids
+    )
+    return embeddings
 
 #Encdoe question function 
 def encode_question(query):
