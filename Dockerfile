@@ -1,17 +1,18 @@
+# Use the official Python 3.9 image as base
 FROM python:3.9
 
-#initialize working directory 
+# Set the working directory in the container
 WORKDIR /app
 
-#copy the current directory inside the container
-COPY . /app/
+# Copy the current directory (containing code and requirements.txt) to the container
+COPY . .
 
-#install requirements.txt
-RUN  pip install -r requirements.txt
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
+# Expose port 8000 to the outside world
+# EXPOSE 8000
 
-# copy the application code tot the working directoyr 
-COPY  . . 
+# Command to run the FastAPI application using uvicorn
+CMD ["python", "app.py"]
 
-#expose the application code to the working directory 
-EXPOSE 8000

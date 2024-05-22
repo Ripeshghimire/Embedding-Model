@@ -1,7 +1,7 @@
 from fastapi.responses import HTMLResponse, JSONResponse
-from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, UploadFile, Request, HTTPException
 import os
 import google.generativeai as genai
@@ -69,11 +69,6 @@ async def extract_text(pdfFile: UploadFile):
         logging.error(f"Error Processing PDF: {e}")
         raise HTTPException(status_code=500, detail="Failed to process PDF")
 
-prompt = '''
-You are an advanced AI build by Ripesh Ghimire. You are to answer the question based on the most similar text  
-
-'''
-
 
 @app.post('/query')
 async def similar_text(request: Request):
@@ -90,8 +85,7 @@ async def similar_text(request: Request):
             n_results= 1         
         )
         logging.info(f"Query results: {results}")
-        response = results['documents']['result']
-        
+        response = results['documents']
         return JSONResponse(content={"results": response})
     except Exception as e:
         logging.error(f"Error querying text: {e}")
@@ -100,4 +94,4 @@ async def similar_text(request: Request):
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0")
