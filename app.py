@@ -25,7 +25,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 genai.configure(api_key=os.environ["API_KEY"])
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# app.mount("/static", StaticFiles(directory="static"), name="static")
 global_df = pd.DataFrame()
 origins = ["http://127.0.0.1:8000"]
 app.add_middleware(
