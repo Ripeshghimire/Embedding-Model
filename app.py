@@ -1,8 +1,8 @@
-from fastapi import FastAPI, UploadFile, Request, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, UploadFile, Request, HTTPException
 import os
 import google.generativeai as genai
 from pypdf import PdfReader
@@ -12,21 +12,21 @@ from dotenv import load_dotenv
 import json
 import pandas as pd
 from cleantext import cleanpdf_text
-from retrieval import chunk_text,embed_text,encode_question
+from retrieval import chunk_text, embed_text, encode_question
 import warnings
 import chromadb
 import logging
+import numpy as np 
 from langchain_community.vectorstores import chroma
 load_dotenv()
 logging.basicConfig(level=logging.INFO)
 warnings.filterwarnings("ignore")
-df = pd.DataFrame(columns=['chunk_text','embeddings'])
+df = pd.DataFrame(columns=['chunk_text', 'embeddings'])
 genai.configure(api_key=os.environ["API_KEY"])
-
 
 app = FastAPI()
 chroma_client = chromadb.Client()
-collection = chroma_client.get_collection('vector_collection')
+collection = chroma_client.get_collection(name='vector_collection')
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -42,7 +42,7 @@ app.add_middleware(
 
 @app.get('/', response_class=HTMLResponse)
 async def root(request: Request):
-    return templates.TemplateResponse(request=request, name='index.html')
+    return templates.TemplateResponse("index.html", {"request": request})
 
 @app.post('/pdf')
 async def extract_text(pdfFile: UploadFile):
@@ -52,29 +52,37 @@ async def extract_text(pdfFile: UploadFile):
     try:
         contents = await pdfFile.read()
         file_like_object = BytesIO(contents)
-        pages = PdfReader(file_like_object).pages
+        reader = PdfReader(file_like_object)
         text = ""
-        for page in pages:
+        for page in reader.pages:
             text += page.extract_text()
-        chunked_text = chunk_text(cleanpdf_text(text))
+        cleaned_text = cleanpdf_text(text)
+        chunked_text = chunk_text(cleaned_text)
         embedded_text = embed_text(chunked_text)
-        return embedded_text
-    except Exception as e :
-        logging.error(f"Error Processing pdf {e}")
-        raise HTTPException(status_code=500, detail="Failed to process Pdf")
-    
+        return JSONResponse(content={"embeddings": embedded_text})
+    except Exception as e:
+        logging.error(f"Error Processing PDF: {e}")
+        raise HTTPException(status_code=500, detail="Failed to process PDF")
 
-async def similar_text(request:Request):
-    question = await request.json()
-    question = question['question']
-    encode_query = encode_question(question)
-    logging.INFO(encode_query)
-    text = collection.query(
-        query_embeddings=encode_query,
-        n_results=1
-    )
-    logging.INFO(text)
-    return text['data']
+@app.post('/query')
+async def similar_text(request: Request):
+    """
+    Takes a query from the user, encodes it, and retrieves the most similar text from the database.
+    """
+    try:
+        body = await request.json()
+        question = body['question']
+        encode_query = encode_question(question)
+        logging.info(f"Encoded query: {encode_query}")
+        results = collection.query (
+            query_embeddings=[encode_query.tolist()],
+            n_results= 1         
+        )
+        logging.info(f"Query results: {results}")
+        return JSONResponse(content={"results": results['documents']})
+    except Exception as e:
+        logging.error(f"Error querying text: {e}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve similar text")
+
 if __name__ == "__main__":
-    uvicorn.run(app,port=8000)
-    
+    uvicorn.run(app, host="0.0.0.0", port=8000)
