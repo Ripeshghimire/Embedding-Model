@@ -16,7 +16,6 @@ from retrieval import chunk_text, embed_text, encode_question
 import warnings
 import chromadb
 import logging
-import numpy as np 
 from langchain_community.vectorstores import chroma
 load_dotenv()
 logging.basicConfig(level=logging.INFO)
@@ -26,7 +25,7 @@ genai.configure(api_key=os.environ["API_KEY"])
 
 app = FastAPI()
 chroma_client = chromadb.Client()
-collection = chroma_client.get_collection(name='vector_collection')
+collection = chroma_client.create_collection('vector_database')
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -58,11 +57,23 @@ async def extract_text(pdfFile: UploadFile):
             text += page.extract_text()
         cleaned_text = cleanpdf_text(text)
         chunked_text = chunk_text(cleaned_text)
-        embedded_text = embed_text(chunked_text)
+        embedded_text,ids = embed_text(chunked_text)
+
+        collection.add(
+            documents= chunked_text,
+            embeddings=embedded_text,
+            ids= ids
+     )
         return JSONResponse(content={"embeddings": embedded_text})
     except Exception as e:
         logging.error(f"Error Processing PDF: {e}")
         raise HTTPException(status_code=500, detail="Failed to process PDF")
+
+prompt = '''
+You are an advanced AI build by Ripesh Ghimire. You are to answer the question based on the most similar text  
+
+'''
+
 
 @app.post('/query')
 async def similar_text(request: Request):
@@ -79,10 +90,14 @@ async def similar_text(request: Request):
             n_results= 1         
         )
         logging.info(f"Query results: {results}")
-        return JSONResponse(content={"results": results['documents']})
+        response = results['documents']['result']
+        
+        return JSONResponse(content={"results": response})
     except Exception as e:
         logging.error(f"Error querying text: {e}")
         raise HTTPException(status_code=500, detail="Failed to retrieve similar text")
+    
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

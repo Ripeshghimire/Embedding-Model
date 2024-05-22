@@ -66,12 +66,8 @@ def embed_text(chunked_text: list):
         embeddings.append(embds_list)
         ids.append(str(uuid.uuid4())) 
     # Assuming collection is defined and initialized earlier
-    collection.add(
-        embeddings=embeddings,  # Corrected the typo here whow are you ==
-        documents=chunked_text,  # Passing the list of chunks as documents
-        ids = ids
-    )
-    return embeddings
+
+    return embeddings,ids
 
 #Encdoe question function 
 def encode_question(query):
