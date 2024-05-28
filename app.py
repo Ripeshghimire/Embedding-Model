@@ -27,13 +27,8 @@ app = FastAPI()
 chroma_client = chromadb.Client()
 collection = chroma_client.create_collection('vector_database')
 templates = Jinja2Templates(directory="templates")
-<<<<<<< HEAD
-# app.mount("/static", StaticFiles(directory="static"), name="static")
-global_df = pd.DataFrame()
-=======
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
->>>>>>> dev
 origins = ["http://127.0.0.1:8000"]
 
 app.add_middleware(
