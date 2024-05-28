@@ -106,6 +106,6 @@ def llmresponse(text):
     Returns:
     str: Generated response.
     '''
-    text = f'{prompt} + {text}'
+    text = f'{prompt + text}'
     response = model1.generate_content(text)
     return response

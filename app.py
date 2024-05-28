@@ -9,7 +9,6 @@ from pypdf import PdfReader
 import uvicorn
 from io import BytesIO
 from dotenv import load_dotenv
-import json
 import pandas as pd
 from cleantext import cleanpdf_text
 from retrieval import chunk_text, embed_text, encode_question,llmresponse
@@ -84,8 +83,10 @@ async def similar_text(request: Request):
             n_results=1         
         )
         logging.info(f"Query results: {results}")
-        response = results['documents'][0] if 'documents' in results and results['documents'] else "No documents found"
+        response = results['documents'][0][0] if results['documents'] else "No documents found"
+        logging.info(response)
         response_text = llmresponse(response).text
+        logging.info(response_text)
         return JSONResponse(content={"results": response_text})
     except Exception as e:
         logging.error(f"Error querying text: {e}")
