@@ -94,6 +94,18 @@ def encode_question(query):
 #         n_results=1
 #     )                                         
 #     return results
-
-    
-    
+prompt = f'''Suppose you are a advanced ai created by Ripesh Ghimire. You should give the answer that 
+is given by the most similar text in the pdf according to the answer.IF there is no answer of the given query provided by the user you are to say there is no answer for this 
+question. If you have the answer you are to be the answer and make it understandable to the user'''
+model1= genai.GenerativeModel('gemini-1.5-flash')
+def llmresponse(text):
+    '''
+    Generates a response using the generative AI model.
+    Parameters:
+    text (str): Text prompt for the model.
+    Returns:
+    str: Generated response.
+    '''
+    text = f'{prompt} + {text}'
+    response = model1.generate_content(text)
+    return response

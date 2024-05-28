@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 import json
 import pandas as pd
 from cleantext import cleanpdf_text
-from retrieval import chunk_text, embed_text, encode_question
+from retrieval import chunk_text, embed_text, encode_question,llmresponse
 import warnings
 import chromadb
 import logging
@@ -69,7 +69,6 @@ async def extract_text(pdfFile: UploadFile):
         logging.error(f"Error Processing PDF: {e}")
         raise HTTPException(status_code=500, detail="Failed to process PDF")
 
-
 @app.post('/query')
 async def similar_text(request: Request):
     """
@@ -80,18 +79,17 @@ async def similar_text(request: Request):
         question = body['question']
         encode_query = encode_question(question)
         logging.info(f"Encoded query: {encode_query}")
-        results = collection.query (
+        results = collection.query(
             query_embeddings=[encode_query.tolist()],
-            n_results= 1         
+            n_results=1         
         )
         logging.info(f"Query results: {results}")
-        response = results['documents']
-        return JSONResponse(content={"results": response})
+        response = results['documents'][0] if 'documents' in results and results['documents'] else "No documents found"
+        response_text = llmresponse(response).text
+        return JSONResponse(content={"results": response_text})
     except Exception as e:
         logging.error(f"Error querying text: {e}")
         raise HTTPException(status_code=500, detail="Failed to retrieve similar text")
-    
-
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0")
