@@ -1,0 +1,15 @@
+version: "3.8"
+services:
+  rag:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: rag
+    container_name: rag
+    ports:
+      - 8000:8000
+    restart: always
+    networks:
+      - rag
+networks:
+  rag:

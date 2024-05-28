@@ -8,3 +8,7 @@ nltk
 langchain
 pandas
 scikit-learn
+langchain-chroma
+langchain-openai
+langchain_experimental
+chromadb 
